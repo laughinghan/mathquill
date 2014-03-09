@@ -75,7 +75,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left').typedText(')');
       assertLatex('\\left(1+2+3\\right)+4');
       mq.keystroke('Backspace');
-      assertLatex('1+2+3+4');
+      assertLatex('\\left(1+2+3+4\\right)');
     });
 
     test('backspacing close paren then open paren', function() {
@@ -93,7 +93,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left Left Left Left Left Backspace');
       assertLatex('\\left(1+2+3\\right)+4');
       mq.keystroke('Right Right Right Right Backspace');
-      assertLatex('1+2+3+4');
+      assertLatex('\\left(1+2+3+4\\right)');
     });
 
     test('backspacing close bracket then open paren', function() {
@@ -111,7 +111,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left Left Left Left Left Backspace');
       assertLatex('\\left[1+2+3\\right]+4');
       mq.keystroke('Right Right Right Right Backspace');
-      assertLatex('1+2+3+4');
+      assertLatex('\\left[1+2+3+4\\right]');
     });
 
 
@@ -130,7 +130,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left Left Left Backspace');
       assertLatex('\\left[1+2+3\\right]');
       mq.keystroke('Right Right Right Right Backspace');
-      assertLatex('1+2+3');
+      assertLatex('\\left[1+2+3\\right]');
     });
 
     test('backspacing close bracket then open paren at beginning', function() {
@@ -148,7 +148,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left Left Left Left Left Backspace');
       assertLatex('\\left[2+3\\right]+4');
       mq.keystroke('Right Right Right Right Backspace');
-      assertLatex('2+3+4');
+      assertLatex('\\left[2+3+4\\right]');
     });
 
     test('backspacing close bracket then open paren of empty paren group', function() {
@@ -166,7 +166,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left Left Backspace');
       assertLatex('\\left[1+\\right]+4');
       mq.keystroke('Right Backspace');
-      assertLatex('1++4');
+      assertLatex('\\left[1++4\\right]');
     });
 
     test('backspacing close bracket then open paren at end of empty paren group', function() {
@@ -184,7 +184,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Backspace');
       assertLatex('\\left[1+\\right]');
       mq.keystroke('Right Right Backspace');
-      assertLatex('1+');
+      assertLatex('\\left[1+\\right]');
     });
 
     test('backspacing close bracket then open paren at beginning of empty paren group', function() {
@@ -202,7 +202,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left Left Backspace');
       assertLatex('\\left[\\right]+4');
       mq.keystroke('Right Backspace');
-      assertLatex('+4');
+      assertLatex('\\left[+4\\right]');
     });
 
     test('rendering mis-matched brackets from LaTeX then backspacing close bracket then open paren', function() {
@@ -220,7 +220,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left Left Left Left Left Backspace');
       assertLatex('\\left[1+2+3\\right]+4');
       mq.keystroke('Right Right Right Right Backspace');
-      assertLatex('1+2+3+4');
+      assertLatex('\\left[1+2+3+4\\right]');
     });
 
     test('rendering paren from LaTeX then backspacing close paren then open paren', function() {
@@ -238,7 +238,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Left Left Left Left Left Left Backspace');
       assertLatex('\\left(1+2+3\\right)+4');
       mq.keystroke('Right Right Right Right Backspace');
-      assertLatex('1+2+3+4');
+      assertLatex('\\left(1+2+3+4\\right)');
     });
 
     test('wrapping selection in parens then backspacing close paren then open paren', function() {
@@ -260,7 +260,7 @@ suite('typing with auto-replaces', function() {
       mq.keystroke('Backspace');
       assertLatex('\\left(1+2+3\\right)+4');
       mq.keystroke('Right Right Right Right Backspace');
-      assertLatex('1+2+3+4');
+      assertLatex('\\left(1+2+3+4\\right)');
     });
 
     test('paren stays one-sided after typing after ghost paren', function() {
