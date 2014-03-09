@@ -469,6 +469,13 @@ var Bracket = P(MathCommand, function(_, _super) {
     }
   };
   _.deleteTowards = function(dir, cursor) {
+    if (dir === -this.side) { // deleting non-ghost of one-sided bracket, so
+      this.ends[L].children().disown() // move everything in me outside, and
+        .withDirAdopt(dir, this.parent, this[dir], this).jQ.insDirOf(dir, this.jQ);
+      this.remove(); // remove me
+      cursor[dir] = cursor[-dir] ? cursor[-dir][dir] : cursor.parent.ends[-dir];
+      return;
+    }
     cursor.insAtDirEnd(-dir, this.ends[L]);
     cursor[-dir] = this[-dir];
     this.oneSideify(dir);
