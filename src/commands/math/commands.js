@@ -512,6 +512,14 @@ var Bracket = P(MathCommand, function(_, _super) {
     this.ends[L].deleteOutOf = function(dir, cursor) {
       this.parent.deleteSide(dir, true, cursor);
     };
+    this.ends[L].focus = function() {
+      MathBlock.p.focus.call(this); // TODO: a better CSS class name
+      this.parent.jQ.addClass('cursor-within-parens');
+    };
+    this.ends[L].blur = function() {
+      MathBlock.p.blur.call(this);
+      this.parent.jQ.removeClass('cursor-within-parens');
+    };
   };
   _.siblingCreated = function(dir) {
     if (dir === -this.side) { // that ghost no longer at far end of its block
