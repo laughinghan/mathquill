@@ -2,13 +2,20 @@ suite('autoOperatorNames', function() {
   var mq;
   setup(function() {
     mq = MQ.MathField($('<span></span>').appendTo('#mock')[0]);
-  });
-  teardown(function() {
-    $(mq.el()).remove();
+    mq.config({
+      autoCommands: 'sum int'
+    });
   });
 
   function assertLatex(input, expected) {
     var result = mq.latex();
+    assert.equal(result, expected,
+      input+', got \''+result+'\', expected \''+expected+'\''
+    );
+  }
+
+  function assertText(input, expected) {
+    var result = mq.text();
     assert.equal(result, expected,
       input+', got \''+result+'\', expected \''+expected+'\''
     );
@@ -27,14 +34,15 @@ suite('autoOperatorNames', function() {
       assertLatex('parsing \''+str+'\'', latex);
       assert.equal(count, 1);
 
+      // Since Latex doesn't change, count should remain at 1.
       mq.latex(latex);
       assertLatex('parsing \''+latex+'\'', latex);
-      assert.equal(count, 2);
+      assert.equal(count, 1);
 
       mq.latex('');
       for (var i = 0; i < str.length; i += 1) mq.typedText(str.charAt(i));
       assertLatex('typing \''+str+'\'', latex);
-      assert.equal(count, 2 + str.length);
+      assert.equal(count, 1 + str.length);
     }
 
     assertAutoOperatorNamesWork('sin', '\\sin');
@@ -45,6 +53,39 @@ suite('autoOperatorNames', function() {
     assertAutoOperatorNamesWork('arcosecant', 'ar\\operatorname{cosec}ant');
     assertAutoOperatorNamesWork('cscscscscscsc', '\\csc s\\csc s\\csc sc');
     assertAutoOperatorNamesWork('scscscscscsc', 's\\csc s\\csc s\\csc');
+  });
+
+  test('works in \\sum', function () {
+    mq.typedText('sum')
+    mq.typedText('sin')
+    assertLatex('sum allows operatorname', '\\sum_{\\sin}^{ }');
+  })
+
+  test('works in \\int', function () {
+    mq.typedText('int')
+    mq.typedText('sin')
+    assertLatex('int allows operatorname', '\\int_{\\sin}^{ }');
+  })
+
+  test('does not work in simple subscripts when typing', function () {
+    mq.typedText('x_')
+    mq.typedText('sin')
+    assertLatex('subscripts do not turn to operatorname','x_{sin}');
+  })
+
+  test('does not work in simple subscripts when pasting', function () {
+    $(mq.el()).find('textarea').trigger('paste').val('x_{sin}').trigger('input');
+    assertLatex('subscripts do not turn to operatorname','x_{sin}');
+  })
+
+  test('text() output', function(){
+    function assertTranslatedCorrectly(latexStr, text) {
+      mq.latex(latexStr);
+      assertText('outputting ' + latexStr, text);
+    }
+
+    assertTranslatedCorrectly('\\sin', 'sin');
+    assertTranslatedCorrectly('\\sin\\left(xy\\right)', 'sin(x*y)');
   });
 
   test('deleting', function() {
@@ -79,7 +120,7 @@ suite('autoOperatorNames', function() {
 
   suite('override autoOperatorNames', function() {
     test('basic', function() {
-      MQ.config({ autoOperatorNames: 'sin lol' });
+      mq.config({ autoOperatorNames: 'sin lol' });
       mq.typedText('arcsintrololol');
       assert.equal(mq.latex(), 'arc\\sin tro\\operatorname{lol}ol');
     });

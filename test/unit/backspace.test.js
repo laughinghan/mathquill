@@ -6,9 +6,6 @@ suite('backspace', function() {
     controller = mq.__controller;
     cursor = controller.cursor;
   });
-  teardown(function() {
-    $(mq.el()).remove();
-  });
 
   function prayWellFormedPoint(pt) { prayWellFormed(pt.parent, pt[L], pt[R]); }
   function assertLatex(latex) {
@@ -30,7 +27,7 @@ suite('backspace', function() {
 
     mq.keystroke('Backspace');
     assert.equal(cursor.parent, expBlock, 'cursor still in exponent');
-    assertLatex('x^n');
+    assertLatex('x^{n}');
 
     mq.keystroke('Backspace');
     assert.equal(cursor.parent, expBlock, 'still in exponent, but it is empty');
@@ -85,17 +82,17 @@ suite('backspace', function() {
 
     //first backspace goes into the subscript
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_{2_2}');
+    assert.equal(mq.latex(),'x_{2_{2}}');
 
     //second one goes into the subscripts' subscript
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_{2_2}');
+    assert.equal(mq.latex(),'x_{2_{2}}');
 
     mq.keystroke('Backspace');
     assert.equal(mq.latex(),'x_{2_{ }}');
 
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_2');
+    assert.equal(mq.latex(),'x_{2}');
 
     mq.keystroke('Backspace');
     assert.equal(mq.latex(),'x_{ }');
@@ -115,7 +112,7 @@ suite('backspace', function() {
     mq.keystroke('Backspace');
     assert.equal(mq.latex(),'x_{2+}');
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_2');
+    assert.equal(mq.latex(),'x_{2}');
     mq.keystroke('Backspace');
     assert.equal(mq.latex(),'x_{ }');
     mq.keystroke('Backspace');
@@ -127,23 +124,23 @@ suite('backspace', function() {
 
     //first backspace takes us into the exponent
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_2^{32}');
+    assert.equal(mq.latex(),'x_{2}^{32}');
 
     //second backspace is within the exponent
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_2^3');
+    assert.equal(mq.latex(),'x_{2}^{3}');
 
     //clear out exponent
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_2^{ }');
+    assert.equal(mq.latex(),'x_{2}^{ }');
 
     //unpeel exponent
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_2');
+    assert.equal(mq.latex(),'x_{2}');
 
     //into subscript
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'x_2');
+    assert.equal(mq.latex(),'x_{2}');
 
     //clear out subscript
     mq.keystroke('Backspace');
@@ -182,11 +179,11 @@ suite('backspace', function() {
 
     //first backspace takes out the argument
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'\\sum_{n=1}^3');
+    assert.equal(mq.latex(),'\\sum_{n=1}^{3}');
 
     //up into the superscript
     mq.keystroke('Backspace');
-    assert.equal(mq.latex(),'\\sum_{n=1}^3');
+    assert.equal(mq.latex(),'\\sum_{n=1}^{3}');
 
     //up into the superscript
     mq.keystroke('Backspace');
@@ -197,7 +194,7 @@ suite('backspace', function() {
     assert.equal(mq.latex(),'n=1');
   });
 
-  test('backspace into text block', function() {
+  test('backspace through text block', function() {
     mq.latex('\\text{x}');
 
     mq.keystroke('Backspace');
@@ -206,6 +203,18 @@ suite('backspace', function() {
     assert.equal(cursor.parent, textBlock, 'cursor is in text block');
     assert.equal(cursor[R], 0, 'cursor is at the end of text block');
     assert.equal(cursor[L].text, 'x', 'cursor is rightward of the x');
+    assert.equal(mq.latex(), '\\text{x}', 'the x has been deleted');
+
+    mq.keystroke('Backspace');
+    assert.equal(cursor.parent, textBlock, 'cursor is still in text block');
+    assert.equal(cursor[R], 0, 'cursor is at the right end of the text block');
+    assert.equal(cursor[L], 0, 'cursor is at the left end of the text block');
+    assert.equal(mq.latex(), '', 'the x has been deleted');
+
+    mq.keystroke('Backspace');
+    assert.equal(cursor[R], 0, 'cursor is at the right end of the root block');
+    assert.equal(cursor[L], 0, 'cursor is at the left end of the root block');
+    assert.equal(mq.latex(), '');
   });
 
   suite('empties', function() {

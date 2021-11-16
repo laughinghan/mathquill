@@ -1,3 +1,9 @@
+// look here to see the digit layout strategy:
+// https://www.desmos.com/calculator/ctvh9utz0t
+@digit-separator: .11em;
+@expand-margin: .009em;
+@contract-margin: -.01em;
+
 .mq-root-block, .mq-math-mode .mq-root-block {
   .inline-block;
   width: 100%;
@@ -6,7 +12,40 @@
   white-space: nowrap;
   overflow: hidden;
   vertical-align: middle;
+
+  .mq-digit {
+    margin-left: @expand-margin;
+    margin-right: @expand-margin;
+  }
+
+  .mq-group-start {
+    margin-left: @digit-separator;
+    margin-right: @contract-margin;
+  }
+
+  .mq-group-other {
+    margin-left: @contract-margin;
+    margin-right: @contract-margin;
+  }
+
+  .mq-group-leading-1, .mq-group-leading-2 {
+    margin-left: 0;
+    margin-right: @contract-margin;
+  }
+
+  .mq-group-leading-3 {
+    margin-left: 4 * @expand-margin;
+    margin-right: @contract-margin;
+  }
+
+  &.mq-suppress-grouping {
+    .mq-group-start, .mq-group-other, .mq-group-leading-1, .mq-group-leading-2, .mq-group-leading-3 {
+      margin-left: @expand-margin;
+      margin-right: @expand-margin;
+    }
+  }
 }
+
 .mq-math-mode {
   font-variant: normal;
   font-weight: normal;
@@ -25,6 +64,20 @@
     line-height: .9;
   }
 
+  svg {
+    // svg symbols are sometimes used for autoscaling brackets and
+    // square root symbols. This piece of css magic allows you to copy
+    // over the current value of the font color to the svg symbols.
+    fill: currentColor;
+
+    // the svg symbols fill their container
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
   * {
     font-size: inherit;
     line-height: inherit;
@@ -37,9 +90,12 @@
 
   // TODO: what's the difference between these?
   .mq-empty {
-    background: #ccc;
+    background: rgba(0,0,0,.2);
     &.mq-root-block {
       background: transparent;
+    }
+    &.mq-empty-parens, &.mq-empty-square-brackets {
+      background: transparent
     }
   }
 
@@ -47,9 +103,17 @@
     background: transparent;
   }
 
-
   .mq-text-mode {
-    font-size: 87%;
+    display: inline-block;
+    white-space: pre;  
+  }
+
+  .mq-text-mode.mq-hasCursor {
+    box-shadow: inset darkgray 0 .1em .2em;
+    padding: 0 .1em;
+    margin: 0 -.1em;
+
+    min-width: 1ex;
   }
 
   .mq-font {
@@ -71,7 +135,7 @@
   }
 
   var.mq-f {
-    margin-right: 0.1em;
+    margin-right: 0.2em;
     margin-left: 0.1em;
   }
 
@@ -80,7 +144,29 @@
   }
 
   big {
-    font-size: 125%;
+    font-size: 200%;
+  }
+
+  .mq-int {
+    > big {
+      display: inline-block;
+      .transform(scaleX(.7));
+      vertical-align: -.16em;
+    }
+
+    > .mq-supsub {
+      font-size: 80%;
+      vertical-align: -1.1em;
+      padding-right: .2em;
+
+      > .mq-sup > .mq-sup-inner {
+        vertical-align: 1.3em;
+      }
+
+      > .mq-sub {
+        margin-left: -.35em;
+      }
+    }
   }
 
   .mq-roman {
@@ -96,11 +182,11 @@
   }
 
   .mq-overline {
-    border-top: 1px solid black;
+    border-top: 1px solid;
     margin-top: 1px;
   }
   .mq-underline {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid;
     margin-bottom: 1px;
   }
 
@@ -122,17 +208,14 @@
   //   its contents, rather than always being as wide as the subscript.
   //   See also .fraction
   .mq-supsub {
+    text-align: left;
     font-size: 90%;
     vertical-align: -.5em;
-    &.mq-limit {
-      font-size: 80%;
-      vertical-align: -.4em;
-    }
 
     &.mq-sup-only {
       vertical-align: .5em;
 
-      .mq-sup {
+      & > .mq-sup {
         display: inline-block;
         vertical-align: text-bottom;
       }
@@ -145,9 +228,6 @@
     .mq-sub {
       display: block;
       float: left;
-    }
-    &.mq-limit .mq-sub {
-      margin-left: -.25em;
     }
 
     .mq-binary-operator {
@@ -171,21 +251,24 @@
 
   ////
   // parentheses
-  .mq-paren {
-    padding: 0 .1em;
-    vertical-align: top;
-    -webkit-transform-origin: center .06em;
-    -moz-transform-origin: center .06em;
-    -ms-transform-origin: center .06em;
-    -o-transform-origin: center .06em;
-    transform-origin: center .06em;
-
-    &.mq-ghost { color: silver; }
-
-    + span {
-      margin-top: .1em;
-      margin-bottom: .1em;
-    }
+  .mq-ghost svg { opacity: .2 }
+  .mq-bracket-middle {
+    margin-top: .1em;
+    margin-bottom: .1em;
+  }
+  .mq-bracket-l, .mq-bracket-r {
+    position: absolute;
+    top: 0;
+    bottom: 2px;
+  }
+  .mq-bracket-l {
+    left: 0;
+  }
+  .mq-bracket-r {
+    right:0;
+  }
+  .mq-bracket-container {
+    position: relative;
   }
 
   .mq-array {
@@ -208,7 +291,7 @@
   var.mq-operator-name.mq-first {
     padding-left: .2em;
   }
-  var.mq-operator-name.mq-last {
+  var.mq-operator-name.mq-last, .mq-supsub.mq-after-operator-name {
     padding-right: .2em;
   }
 
@@ -236,7 +319,7 @@
     display: inline-block;
   }
 
-  .mq-numerator, .mq-denominator {
+  .mq-numerator, .mq-denominator, .mq-dot-recurring {
     display: block;
   }
 
@@ -251,39 +334,64 @@
     padding: 0.1em;
   }
 
+  .mq-dot-recurring {
+    text-align: center;
+    height: 0.3em;
+  }
+
   ////
   // \sqrt
   // square roots
   .mq-sqrt-prefix {
-    padding-top: 0;
+    position: absolute;
+    top: 1px;
+    bottom: 0.15em;
+    width: 0.95em;
+  }
+
+  .mq-sqrt-container {
     position: relative;
-    top: 0.1em;
-    vertical-align: top;
-    .transform-origin(top);
   }
 
   .mq-sqrt-stem {
     border-top: 1px solid;
     margin-top: 1px;
+    margin-left: 0.9em;
     padding-left: .15em;
     padding-right: .2em;
     margin-right: .1em;
     padding-top: 1px;
   }
 
-  .mq-vector-prefix {
+  .mq-diacritic-above {
     display: block;
     text-align: center;
-    line-height: .25em;
-    margin-bottom: -.1em;
-    font-size: 0.75em;
+    line-height: .4em;
   }
 
-  .mq-vector-stem {
+  .mq-diacritic-stem {
+    display: block;
+    text-align: center;
+  }
+
+  .mq-hat-prefix {
+    display: block;
+    text-align: center;
+    line-height: .95em;
+    margin-bottom: -.7em;
+    transform: scaleX(1.5);
+    -moz-transform: scaleX(1.5);
+    -o-transform: scaleX(1.5);
+    -webkit-transform: scaleX(1.5);
+  }
+
+  .mq-hat-stem {
     display: block;
   }
 
   .mq-large-operator {
+    vertical-align: -.2em;
+    padding: .2em;
     text-align: center;
 
     .mq-from, big, .mq-to  {
@@ -302,5 +410,80 @@
   &, .mq-editable-field {
     cursor: text;
     font-family: @symbola;
+  }
+
+  .mq-overarc {
+    border-top: 1px solid black;
+    -webkit-border-top-right-radius: 50% .3em;
+    -moz-border-radius-topright: 50% .3em;
+    border-top-right-radius: 50% .3em;
+    -webkit-border-top-left-radius: 50% .3em;
+    -moz-border-radius-topleft: 50% .3em;
+    border-top-left-radius: 50% .3em;
+    margin-top: 1px;
+    padding-top: 0.15em;
+  }
+
+  .mq-overarrow {
+    min-width: .5em;
+    border-top: 1px solid black;
+    margin-top: 1px;
+    padding-top: 0.2em;
+    text-align: center;
+
+    &:after {
+      position: absolute;
+      right: -0.1em;
+      top: -0.48em;
+      font-size: 0.5em;
+      content: '\27A4';
+    }
+    //really wish I could use :not here, but less doesn't seem to be happy with that
+    &.mq-arrow-left:after {
+      content: '';
+      display: none;
+    }
+    &.mq-arrow-left:before, &.mq-arrow-leftright:before {
+      position: absolute;
+      top: -0.48em;
+      left: -0.1em;
+      font-size: 0.5em;
+      content: '\27A4';
+      -moz-transform: scaleX(-1);
+      -o-transform: scaleX(-1);
+      -webkit-transform: scaleX(-1);
+      transform: scaleX(-1);
+      filter: FlipH;
+      -ms-filter: "FlipH";
+    }
+    &.mq-arrow-both {
+      vertical-align: text-bottom;
+
+      &.mq-empty {
+        min-height: 1.23em;
+
+        &:after {
+          top: -0.34em;
+        }
+      }
+      &:before{
+        -moz-transform: scaleX(-1);
+        -o-transform: scaleX(-1);
+        -webkit-transform: scaleX(-1);
+        transform: scaleX(-1);
+        filter: FlipH;
+        -ms-filter: "FlipH";
+      }
+      &:after {
+        display: block;
+        position: relative;
+        top: -2.3em;
+        font-size: 0.5em;
+        line-height: 0em;
+        content: '\27A4';
+        visibility: visible; //must override .mq-editable-field.mq-empty:after
+        text-align: right;
+      }
+    }
   }
 }

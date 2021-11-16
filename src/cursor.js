@@ -11,7 +11,8 @@ JS environment could actually contain many instances. */
 
 //A fake cursor in the fake textbox that the math is rendered in.
 var Cursor = P(Point, function(_) {
-  _.init = function(initParent, options) {
+  _.init = function(initParent, options, controller) {
+    this.controller = controller;
     this.parent = initParent;
     this.options = options;
 
@@ -56,7 +57,8 @@ var Cursor = P(Point, function(_) {
     this[-dir] = oppDir;
     // by contract, .blur() is called after all has been said and done
     // and the cursor has actually been moved
-    if (oldParent !== parent && oldParent.blur) oldParent.blur();
+    // FIXME pass cursor to .blur() so text can fix cursor pointers when removing itself
+    if (oldParent !== parent && oldParent.blur) oldParent.blur(this);
   };
   _.insDirOf = function(dir, el) {
     prayDirection(dir);
@@ -97,6 +99,7 @@ var Cursor = P(Point, function(_) {
       var pageX = self.offset().left;
       to.seek(pageX, self);
     }
+    aria.queue(to, true);
   };
   _.offset = function() {
     //in Opera 11.62, .getBoundingClientRect() and hence jQuery::offset()
@@ -231,7 +234,13 @@ var Cursor = P(Point, function(_) {
     this.selectionChanged();
     return true;
   };
-
+  _.resetToEnd = function (controller) {
+    this.clearSelection();
+    var root = controller.root;
+    this[R] = 0;
+    this[L] = root.ends[R];
+    this.parent = root;
+  };
   _.clearSelection = function() {
     if (this.selection) {
       this.selection.clear();
@@ -258,6 +267,19 @@ var Cursor = P(Point, function(_) {
     }
     return seln;
   };
+  _.depth = function() {
+    var node = this;
+    var depth = 0;
+    while (node = node.parent) {
+      depth += (node instanceof MathBlock) ? 1 : 0;
+    }
+    return depth;
+  };
+  _.isTooDeep = function(offset) {
+    if (this.options.maxDepth !== undefined) {
+      return this.depth() + (offset || 0) > this.options.maxDepth;
+    }
+  };
 });
 
 var Selection = P(Fragment, function(_, super_) {
@@ -276,9 +298,10 @@ var Selection = P(Fragment, function(_, super_) {
     this.jQ.replaceWith(this.jQ[0].childNodes);
     return this;
   };
-  _.join = function(methodName) {
+  _.join = function(methodName, separatorToken) {
+    var separator = separatorToken || '';
     return this.fold('', function(fold, child) {
-      return fold + child[methodName]();
+      return fold + separator + child[methodName]();
     });
   };
 });

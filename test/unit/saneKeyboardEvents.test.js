@@ -1,6 +1,8 @@
 suite('saneKeyboardEvents', function() {
   var el;
-  var Event = jQuery.Event
+  var Event = function(type, props) {
+    return jQuery.extend(jQuery.Event(type), props);
+  };
 
   function supportsSelectionAPI() {
     return 'selectionStart' in el[0];
@@ -8,10 +10,6 @@ suite('saneKeyboardEvents', function() {
 
   setup(function() {
     el = $('<textarea>').appendTo('#mock');
-  });
-
-  teardown(function() {
-    el.remove();
   });
 
   test('normal keys', function(done) {
@@ -30,6 +28,25 @@ suite('saneKeyboardEvents', function() {
 
     el.trigger(Event('keydown', { which: 97 }));
     el.trigger(Event('keypress', { which: 97 }));
+    el.val('a');
+  });
+
+  test('normal keys without keypress', function(done) {
+    var counter = 0;
+    saneKeyboardEvents(el, {
+      keystroke: noop,
+      typedText: function(text) {
+        counter += 1;
+        assert.ok(counter <= 1, 'callback is only called once');
+        assert.equal(text, 'a', 'text comes back as a');
+        assert.equal(el.val(), '', 'the textarea remains empty');
+
+        done();
+      }
+    });
+
+    el.trigger(Event('keydown', { which: 97 }));
+    el.trigger(Event('keyup', { which: 97 }));
     el.val('a');
   });
 
@@ -131,11 +148,11 @@ suite('saneKeyboardEvents', function() {
 
       // IE < 9 doesn't support selection{Start,End}
       if (supportsSelectionAPI()) {
-        assert.equal(el[0].selectionStart, 0, 'it\'s selected from the start');
-        assert.equal(el[0].selectionEnd, 6, 'it\'s selected to the end');
+        assert.equal(el[0].selectionStart, 0, 'it is not selected at the start');
+        assert.equal(el[0].selectionEnd, 0, 'it is not selected at the end');
       }
 
-      assert.equal(el.val(), 'foobar', 'it still has content');
+      assert.equal(el.val(), '', 'it has no content');
     });
 
     test('blur then empty selection', function() {
@@ -146,42 +163,42 @@ suite('saneKeyboardEvents', function() {
       assert.ok(document.activeElement !== el[0], 'textarea remains blurred');
     });
 
-    if (!document.hasFocus()) {
-      test('blur in keystroke handler: DOCUMENT NEEDS FOCUS, SEE CONSOLE ');
-      console.warn(
-        'The test "blur in keystroke handler" needs the document to have ' +
-        'focus. Only when the document has focus does .select() on an ' +
-        'element also focus it, which is part of the problematic behavior ' +
-        'we are testing robustness against. (Specifically, erroneously ' +
-        'calling .select() in a timeout after the textarea has blurred, ' +
-        '"stealing back" focus.)\n' +
-        'Normally, the page being open and focused is enough to have focus, ' +
-        'but with the Developer Tools open, it depends on whether you last ' +
-        'clicked on something in the Developer Tools or on the page itself. ' +
-        'Click the page, or close the Developer Tools, and Refresh.'
-      );
-    }
-    else {
-      test('blur in keystroke handler', function(done) {
-        var shim = saneKeyboardEvents(el, {
-          keystroke: function(key) {
-            assert.equal(key, 'Left');
-            el[0].blur();
-          }
-        });
+    test('blur in keystroke handler', function(done) {
+      if (!document.hasFocus()) {
+        console.warn(
+          'The test "blur in keystroke handler" needs the document to have ' +
+          'focus. Only when the document has focus does .select() on an ' +
+          'element also focus it, which is part of the problematic behavior ' +
+          'we are testing robustness against. (Specifically, erroneously ' +
+          'calling .select() in a timeout after the textarea has blurred, ' +
+          '"stealing back" focus.)\n' +
+          'Normally, the page being open and focused is enough to have focus, ' +
+          'but with the Developer Tools open, it depends on whether you last ' +
+          'clicked on something in the Developer Tools or on the page itself. ' +
+          'Click the page, or close the Developer Tools, and Refresh.'
+        );
+        $('#mock').empty(); // LOL next line skips teardown https://git.io/vaUWq
+        this.skip();
+      }
 
-        shim.select('foobar');
-        assert.ok(document.activeElement === el[0], 'textarea focused');
-
-        el.trigger(Event('keydown', { which: 37 }));
-        assert.ok(document.activeElement !== el[0], 'textarea blurred');
-
-        setTimeout(function() {
-          assert.ok(document.activeElement !== el[0], 'textarea remains blurred');
-          done();
-        });
+      var shim = saneKeyboardEvents(el, {
+        keystroke: function(key) {
+          assert.equal(key, 'Left');
+          el[0].blur();
+        }
       });
-    }
+
+      shim.select('foobar');
+      assert.ok(document.activeElement === el[0], 'textarea focused');
+
+      el.trigger(Event('keydown', { which: 37 }));
+      assert.ok(document.activeElement !== el[0], 'textarea blurred');
+
+      setTimeout(function() {
+        assert.ok(document.activeElement !== el[0], 'textarea remains blurred');
+        done();
+      });
+    });
 
     suite('selected text after keypress or paste doesn\'t get mistaken' +
          ' for inputted text', function() {
@@ -408,6 +425,40 @@ suite('saneKeyboardEvents', function() {
       // this synthesizes the keypress timeout calling handleText()
       // before the paste timeout happens.
       el.trigger('input');
+    });
+
+    test('pasting into a focused textarea should not fire a redundant focus event', function(done) {
+      el.focus();
+
+      var focusCalled = false;
+      el.focus(function () {
+        focusCalled = true;
+      });
+
+      saneKeyboardEvents(el, {
+        paste: function () {
+          assert.ok(!focusCalled, 'Pasting into a focused mathquill should not fire a focus event');
+          done();
+        }
+      });
+
+      // Simulate a paste
+      el.trigger('paste');
+      el.val('2');
+      el.trigger('input');
+    });
+  });
+
+  suite('copy', function() {
+    test('only runs handler once even if handler synchronously selects', function() {
+      // ...which MathQuill does and resulted in a stack overflow: https://git.io/vosm0
+      var shim = saneKeyboardEvents(el, {
+        copy: function() {
+          shim.select();
+        }
+      });
+
+      el.trigger('copy');
     });
   });
 });

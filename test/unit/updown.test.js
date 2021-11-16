@@ -6,9 +6,6 @@ suite('up/down', function() {
     controller = mq.__controller;
     cursor = controller.cursor;
   });
-  teardown(function() {
-    $(mq.el()).remove();
-  });
 
   test('up/down in out of exponent', function() {
     controller.renderLatexMath('x^{nm}');
@@ -174,8 +171,29 @@ suite('up/down', function() {
     assert.equal(cursor[L], sub, 'cursor up up from subscript fraction denominator that is at right end goes after subscript');
   });
 
+  test('integral in exponent', function () {
+    controller.renderLatexMath('2^{\\int_0^1}');
+    var exp = rootBlock.ends[R],
+      expBlock = exp.ends[L];
+
+    mq.keystroke('Up');
+    mq.keystroke('Up');
+    assert.equal(cursor.parent.latex(), '1', 'cursor up goes to upper limit');
+    var upperRect = cursor.parent.jQ[0].getBoundingClientRect();
+
+    mq.keystroke('Down');
+    assert.equal(cursor.parent.latex(), '0', 'cursor down goes to lower limit');
+    var lowerRect = cursor.parent.jQ[0].getBoundingClientRect();
+
+    mq.keystroke('Up');
+    assert.equal(cursor.parent.latex(), '1', 'cursor up goes to upper limit');
+
+    var upperAboveLower = upperRect.bottom < lowerRect.top;
+    assert.equal(upperAboveLower, true, 'cursor actually moves downward for lower limit');
+  });
+
   test('\\MathQuillMathField{} in a fraction', function() {
-    var outer = MQ.MathField(
+    var outer = MQ.StaticMath(
       $('<span>\\frac{\\MathQuillMathField{n}}{2}</span>').appendTo('#mock')[0]
     );
     var inner = MQ($(outer.el()).find('.mq-editable-field')[0]);
@@ -183,7 +201,5 @@ suite('up/down', function() {
     assert.equal(inner.__controller.cursor.parent, inner.__controller.root);
     inner.keystroke('Down');
     assert.equal(inner.__controller.cursor.parent, inner.__controller.root);
-
-    $(outer.el()).remove();
   });
 });

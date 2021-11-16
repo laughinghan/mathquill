@@ -1,4 +1,45 @@
-## v0.10.0: 2016-02-20
+## v0.10.1: Fix `font-size: 0` typing problems and more
+
+_2016-03-21_
+
+Important fix: remove `font-size: 0` on textarea (#585), fixing typing
+in Chrome Canary (#540) as well as the Enter key not triggering the
+`enter` handler in Webkit and Blink (#566). `transform: scale(0)` is
+used instead and expected to be much more robust.
+
+(Note: if you're coming from v0.9.x, there've been major API changes,
+see the [v0.9.x → v0.10.0 Migration Guide][].)
+
+[v0.9.x → v0.10.0 Migration Guide]: https://github.com/mathquill/mathquill/wiki/v0.9.x-%E2%86%92-v0.10.0-Migration-Guide
+
+**new features:**
+- (#544, #552, #558, #581) new symbols `\nparallel`, `\measuredangle`,
+  `\odot`, `\parallelogram` (nonstandard), `\nless`, `\ngtr`, `\square`
+- (#544) new commands `\overleftarrow`, `\overrightarrow`
+
+
+**bugfixes:**
+- (#585) fix typing in Chrome Canary, Enter key in Webkit+Blink
+- (#582) fix `\degree` symbol to round-trip (rather than exporting
+  `^\circ` which doesn't parse as one symbol)
+- (#578) fix `.text()` to output `\cdot` as `*`
+- (#529, #571, #574) fix `.text()` of fractions, spaces, variables followed
+  by exponents
+- (#577) fix `\triangle` symbol to match LaTeX better
+- (#568) hotfix #435 order-dependence breaking clean build on Linux
+- (#560) fix florin spacing still too close
+- (#546) fix parsing or pasting `×` (Unicode times symbol)
+- (#519/#487) fix auto-horizontal-scroll/pan on API calls
+- (#528) fix #429 can't move cursor out of `TextBlock`
+- (#526) fix exponentiation to export `^` not `**`
+- (#525) fix Tab while there's a selection
+
+**build system fixes:**
+- (#532) add console output to show URL of local test pages
+
+## v0.10.0: Total API overhaul, new features galore
+
+_2016-02-20_
 
 Many major changes including a total overhaul of the API (no more
 auto-MathQuill-ifying of `.mathquill-editable` etc, and no more jQuery
@@ -100,7 +141,9 @@ itself): See the [v0.9.x → v0.10.0 Migration Guide]
 - (#117, #142, #186, #287) massive refactor of cursor methods to not
   assume the edit tree is double-layered
 
-## v0.9.4: 2014-1-22
+## v0.9.4: URGENT HOTFIX for cursor showing up as an ugly box in Chrome 40
+
+_2014-1-22_
 
 URGENT HOTFIX for cursor showing up as an ugly box in Chrome 40 (#371)
 
@@ -118,7 +161,9 @@ URGENT HOTFIX for cursor showing up as an ugly box in Chrome 40 (#371)
 **docs:**
 - (#283) change license from LGPL to Mozilla Public License
 
-## v0.9.3: 2013-11-11
+## v0.9.3: Fix `NZQRC` appearing double-struck/blackboard bold
+
+_2013-11-11_
 
 **new features:**
 - (#185) add `\vec`
@@ -137,7 +182,9 @@ URGENT HOTFIX for cursor showing up as an ugly box in Chrome 40 (#371)
 - (#189) replace Connect with tiny handwritten static server
 - upgrade to uglifyjs2
 
-## v0.9.2: 2013-04-02
+## v0.9.2: Fix bug in hotfix for typing over selections in Safari 5.1
+
+_2013-04-02_
 
 NOTE: The hotfix for typing over selections in Safari 5.1 (#135) from
 v0.9.1 had a huge bug, fixed as #166.
@@ -162,7 +209,9 @@ v0.9.1 had a huge bug, fixed as #166.
 - New site-building system
 - no more submodules, `npm` only
 
-## v0.9.1: 2012-12-19
+## v0.9.1: Hotfix for typing over selections in Safari 5.1
+
+_2012-12-19_
 
   * Started the changelog
   * Added a `make publish` script
