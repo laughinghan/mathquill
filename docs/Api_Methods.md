@@ -186,6 +186,14 @@ Selects the contents (just like [on `textarea`s](http://www.w3.org/TR/DOM-Level-
 
 Clears the selection.
 
+## .hasSelection()
+
+Returns whether the editable math field currently has a selection.
+
+## .selectionIsUnderlined()
+
+Returns whether every node in the current selection is inside an underline command.
+
 ## .moveToLeftEnd(), .moveToRightEnd()
 
 Move the cursor to the left/right end of the editable field, respectively. These are shorthand for [`.moveToDirEnd(L/R)`](#movetodirenddirection), respectively.

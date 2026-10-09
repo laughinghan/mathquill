@@ -57,6 +57,13 @@ suite('typing with auto-replaces', function () {
     });
   });
 
+  suite('LongDivision', function () {
+    test('places typed digits under the bar', function () {
+      mq.typedText('⟌1234');
+      assertLatex('\\longdiv{1234}');
+    });
+  });
+
   suite('LatexCommandInput', function () {
     test('basic', function () {
       mq.typedText('\\sqrt-x');

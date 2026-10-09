@@ -88,12 +88,24 @@ suite('Public API', function () {
       mq.latex('n+\\frac{n}{2}');
       assert.ok(!mq.__controller.cursor.selection);
       mq.select();
+      assert.ok(mq.hasSelection());
       assert.equal(
         mq.__controller.cursor.selection.join('latex'),
         'n+\\frac{n}{2}'
       );
       mq.clearSelection();
+      assert.ok(!mq.hasSelection());
       assert.ok(!mq.__controller.cursor.selection);
+    });
+
+    test('selectionIsUnderlined', function () {
+      mq.latex('\\underline{abc}');
+      mq.select();
+      assert.ok(mq.selectionIsUnderlined());
+
+      mq.latex('abc');
+      mq.select();
+      assert.ok(!mq.selectionIsUnderlined());
     });
 
     test('select an empty mq', function () {

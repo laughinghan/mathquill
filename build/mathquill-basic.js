@@ -1369,6 +1369,33 @@ var __extends = (this && this.__extends) || (function () {
                 this.__controller.cursor.clearSelection();
                 return this;
             };
+            EditableField.prototype.hasSelection = function () {
+                return !!this.__controller.cursor.selection;
+            };
+            EditableField.prototype.selectionIsUnderlined = function () {
+                var _this = this;
+                var selection = this.__controller.cursor.selection;
+                if (!selection)
+                    return false;
+                var allNodesUnderlined = true;
+                selection.each(function (node) {
+                    var ancestor = node;
+                    var isUnderlined = false;
+                    while (ancestor && ancestor !== _this.__controller.root) {
+                        if (ancestor.ctrlSeq === '\\underline') {
+                            isUnderlined = true;
+                            break;
+                        }
+                        ancestor = ancestor.parent;
+                    }
+                    if (!isUnderlined) {
+                        allNodesUnderlined = false;
+                        return false;
+                    }
+                    return undefined;
+                });
+                return allNodesUnderlined;
+            };
             EditableField.prototype.moveToDirEnd = function (dir) {
                 this.__controller
                     .notify('move')

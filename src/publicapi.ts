@@ -311,6 +311,32 @@ function getInterface(v: number) {
       this.__controller.cursor.clearSelection();
       return this;
     }
+    hasSelection() {
+      return !!this.__controller.cursor.selection;
+    }
+    selectionIsUnderlined() {
+      const selection = this.__controller.cursor.selection;
+      if (!selection) return false;
+
+      let allNodesUnderlined = true;
+      selection.each((node) => {
+        let ancestor: MQNode | 0 = node;
+        let isUnderlined = false;
+        while (ancestor && ancestor !== this.__controller.root) {
+          if (ancestor.ctrlSeq === '\\underline') {
+            isUnderlined = true;
+            break;
+          }
+          ancestor = ancestor.parent;
+        }
+        if (!isUnderlined) {
+          allNodesUnderlined = false;
+          return false;
+        }
+        return undefined;
+      });
+      return allNodesUnderlined;
+    }
 
     moveToDirEnd(dir: Direction) {
       this.__controller

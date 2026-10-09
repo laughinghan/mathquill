@@ -217,6 +217,24 @@ case '!':
 */
 
 //binary operators
+LatexCmds['⟌'] = LatexCmds.longdiv = class LongDivision extends MathCommand {
+  ctrlSeq = '\\longdiv';
+  htmlTemplate =
+    '<span class="mq-non-leaf mq-longdiv-container">' +
+    '<span class="mq-longdiv-stem">&0</span>' +
+    '</span>';
+  textTemplate = ['longdiv(', ')'];
+  mathspeakTemplate = ['Long division,', ', end long division'];
+  ariaLabel = 'long division';
+  parser() {
+    return super.parser().or(
+      Parser.succeed(this).map((command) => {
+        command.createBlocks();
+        return command;
+      })
+    ) as ParserAny;
+  }
+};
 LatexCmds.diamond = bindVanillaSymbol('\\diamond ', '&#9671;', 'diamond');
 LatexCmds.bigtriangleup = bindVanillaSymbol(
   '\\bigtriangleup ',

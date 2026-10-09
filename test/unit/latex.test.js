@@ -195,6 +195,10 @@ suite('latex', function () {
     assertParsesLatex('\\circledot ', '\\odot ');
     assertParsesLatex('\\degree ');
     assertParsesLatex('\\square ');
+    assertParsesLatex('\\longdiv{1234}');
+    assertParsesLatex('\\longdiv', '\\longdiv{ }');
+    assertParsesLatex('⟌', '\\longdiv{ }');
+    assertParsesLatex('⟌{1234}', '\\longdiv{1234}');
   });
 
   suite('public API', function () {

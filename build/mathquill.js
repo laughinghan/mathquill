@@ -1369,6 +1369,33 @@ var __extends = (this && this.__extends) || (function () {
                 this.__controller.cursor.clearSelection();
                 return this;
             };
+            EditableField.prototype.hasSelection = function () {
+                return !!this.__controller.cursor.selection;
+            };
+            EditableField.prototype.selectionIsUnderlined = function () {
+                var _this = this;
+                var selection = this.__controller.cursor.selection;
+                if (!selection)
+                    return false;
+                var allNodesUnderlined = true;
+                selection.each(function (node) {
+                    var ancestor = node;
+                    var isUnderlined = false;
+                    while (ancestor && ancestor !== _this.__controller.root) {
+                        if (ancestor.ctrlSeq === '\\underline') {
+                            isUnderlined = true;
+                            break;
+                        }
+                        ancestor = ancestor.parent;
+                    }
+                    if (!isUnderlined) {
+                        allNodesUnderlined = false;
+                        return false;
+                    }
+                    return undefined;
+                });
+                return allNodesUnderlined;
+            };
             EditableField.prototype.moveToDirEnd = function (dir) {
                 this.__controller
                     .notify('move')
@@ -4891,6 +4918,28 @@ var __extends = (this && this.__extends) || (function () {
       return MQSymbol('\\! ','<span style="margin-right:-.2em"></span>', 'exclamation point');
     */
     //binary operators
+    LatexCmds['\u27cc'] = LatexCmds.longdiv = /** @class */ (function (_super) {
+        __extends(LongDivision, _super);
+        function LongDivision() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.ctrlSeq = '\\longdiv';
+            _this.htmlTemplate = '<span class="mq-non-leaf mq-longdiv-container">' +
+                '<span class="mq-longdiv-stem">&0</span>' +
+                '</span>';
+            _this.textTemplate = ['longdiv(', ')'];
+            _this.mathspeakTemplate = ['Long division,', ', end long division'];
+            _this.ariaLabel = 'long division';
+            return _this;
+        }
+        LongDivision.prototype.parser = function () {
+            return _super.prototype.parser.call(this)
+                .or(Parser.succeed(this).map(function (command) {
+                command.createBlocks();
+                return command;
+            }));
+        };
+        return LongDivision;
+    }(MathCommand));
     LatexCmds.diamond = bindVanillaSymbol('\\diamond ', '&#9671;', 'diamond');
     LatexCmds.bigtriangleup = bindVanillaSymbol('\\bigtriangleup ', '&#9651;', 'triangle up');
     LatexCmds.ominus = bindVanillaSymbol('\\ominus ', '&#8854;', 'o minus');
