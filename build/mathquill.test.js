@@ -4932,8 +4932,7 @@ var __extends = (this && this.__extends) || (function () {
             return _this;
         }
         LongDivision.prototype.parser = function () {
-            return _super.prototype.parser.call(this)
-                .or(Parser.succeed(this).map(function (command) {
+            return _super.prototype.parser.call(this).or(Parser.succeed(this).map(function (command) {
                 command.createBlocks();
                 return command;
             }));
